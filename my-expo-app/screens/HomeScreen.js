@@ -8,81 +8,60 @@ import {
   TextInput,
 } from "react-native";
 import { useAppContext } from "../contexts/AppContext";
-import HouseListing from "../components/HouseListing";
+import CountryListing from "../components/CountryListing";
 
 export default function HomeScreen({ navigation }) {
   const { state, actions } = useAppContext();
-  const [houses, setHouses] = useState([]);
-  const [filteredHouses, setFilteredHouses] = useState([]);
+  const [countries, setCountries] = useState([]);
+  const [filteredCountries, setFilteredCountries] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [showFilters, setShowFilters] = useState(false);
   const [filters, setFilters] = useState({
-    minBedrooms: "",
-    minBathrooms: "",
-    maxPrice: "",
-    furnishingStatus: "",
+    region: "",
   });
 
   useEffect(() => {
-    const loadHouses = () => {
+    const loadCountries = () => {
       try {
         const response = require("../assets/data.json");
-        setHouses(response);
-        setFilteredHouses(response);
+        setCountries(response);
+        setFilteredCountries(response);
       } catch (error) {
-        console.error("Error loading houses data:", error);
+        console.error("Error loading countries data:", error);
       } finally {
         setLoading(false);
       }
     };
 
-    loadHouses();
+    loadCountries();
   }, []);
 
   useEffect(() => {
-    if (houses.length === 0) return;
+    if (countries.length === 0) return;
 
-    let filtered = houses.filter((house) => {
+    let filtered = countries.filter((country) => {
       // Search query filter
       if (searchQuery) {
         const query = searchQuery.toLowerCase();
         const featuresString =
-          `${house.area} ${house.bedrooms} ${house.bathrooms} ${house.stories} ${house.parking} ${house.mainroad} ${house.guestroom} ${house.basement} ${house.hotwaterheating} ${house.airconditioning} ${house.prefarea} ${house.furnishingstatus}`.toLowerCase();
+          `${country.name} ${country.capital} ${country.region} ${country.subregion} ${country.currency_name} ${country.currency} ${country.phone_code} ${country.tld}`.toLowerCase();
 
         if (!featuresString.includes(query)) {
           return false;
         }
       }
 
-      // Numeric filters
-      if (
-        filters.minBedrooms &&
-        house.bedrooms < parseInt(filters.minBedrooms)
-      ) {
-        return false;
-      }
-      if (
-        filters.minBathrooms &&
-        house.bathrooms < parseInt(filters.minBathrooms)
-      ) {
-        return false;
-      }
-      if (filters.maxPrice && house.price > parseInt(filters.maxPrice)) {
-        return false;
-      }
-      if (
-        filters.furnishingStatus &&
-        house.furnishingstatus !== filters.furnishingStatus
-      ) {
+      // Region filter
+      if (filters.region && country.region !== filters.region) {
         return false;
       }
 
       return true;
     });
 
-    setFilteredHouses(filtered);
-  }, [searchQuery, filters, houses]);
+    setFilteredCountries(filtered);
+  }, [searchQuery, filters, countries]);
 
   if (loading) {
     return (
@@ -98,7 +77,7 @@ export default function HomeScreen({ navigation }) {
             state.theme === "dark" ? styles.darkText : styles.lightText,
           ]}
         >
-          Loading houses...
+          Loading countries...
         </Text>
       </View>
     );
@@ -117,7 +96,7 @@ export default function HomeScreen({ navigation }) {
           state.theme === "dark" ? styles.darkText : styles.lightText,
         ]}
       >
-        Houses for Sale
+        Countries Browser
       </Text>
 
       {/* Search Bar */}
@@ -126,7 +105,7 @@ export default function HomeScreen({ navigation }) {
           styles.searchInput,
           state.theme === "dark" ? styles.darkInput : styles.lightInput,
         ]}
-        placeholder="Search by features, area, bedrooms..."
+        placeholder="Search by name, capital, region, currency..."
         placeholderTextColor={state.theme === "dark" ? "#bdc3c7" : "#7f8c8d"}
         value={searchQuery}
         onChangeText={setSearchQuery}
@@ -151,102 +130,13 @@ export default function HomeScreen({ navigation }) {
                 styles.filterInput,
                 state.theme === "dark" ? styles.darkInput : styles.lightInput,
               ]}
-              placeholder="Min Bedrooms"
+              placeholder="Region (e.g., Asia, Europe)"
               placeholderTextColor={
                 state.theme === "dark" ? "#bdc3c7" : "#7f8c8d"
               }
-              value={filters.minBedrooms}
-              onChangeText={(text) =>
-                setFilters({ ...filters, minBedrooms: text })
-              }
-              keyboardType="numeric"
+              value={filters.region}
+              onChangeText={(text) => setFilters({ ...filters, region: text })}
             />
-            <TextInput
-              style={[
-                styles.filterInput,
-                state.theme === "dark" ? styles.darkInput : styles.lightInput,
-              ]}
-              placeholder="Min Bathrooms"
-              placeholderTextColor={
-                state.theme === "dark" ? "#bdc3c7" : "#7f8c8d"
-              }
-              value={filters.minBathrooms}
-              onChangeText={(text) =>
-                setFilters({ ...filters, minBathrooms: text })
-              }
-              keyboardType="numeric"
-            />
-            <TextInput
-              style={[
-                styles.filterInput,
-                state.theme === "dark" ? styles.darkInput : styles.lightInput,
-              ]}
-              placeholder="Max Price"
-              placeholderTextColor={
-                state.theme === "dark" ? "#bdc3c7" : "#7f8c8d"
-              }
-              value={filters.maxPrice}
-              onChangeText={(text) =>
-                setFilters({ ...filters, maxPrice: text })
-              }
-              keyboardType="numeric"
-            />
-          </View>
-
-          <View style={styles.furnishingFilter}>
-            <Text
-              style={[
-                styles.filterLabel,
-                state.theme === "dark" ? styles.darkText : styles.lightText,
-              ]}
-            >
-              Furnishing:
-            </Text>
-            <TouchableOpacity
-              style={[
-                styles.filterButton,
-                filters.furnishingStatus === "" && styles.activeFilterButton,
-              ]}
-              onPress={() => setFilters({ ...filters, furnishingStatus: "" })}
-            >
-              <Text style={styles.filterButtonText}>All</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[
-                styles.filterButton,
-                filters.furnishingStatus === "furnished" &&
-                  styles.activeFilterButton,
-              ]}
-              onPress={() =>
-                setFilters({ ...filters, furnishingStatus: "furnished" })
-              }
-            >
-              <Text style={styles.filterButtonText}>Furnished</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[
-                styles.filterButton,
-                filters.furnishingStatus === "semi-furnished" &&
-                  styles.activeFilterButton,
-              ]}
-              onPress={() =>
-                setFilters({ ...filters, furnishingStatus: "semi-furnished" })
-              }
-            >
-              <Text style={styles.filterButtonText}>Semi</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[
-                styles.filterButton,
-                filters.furnishingStatus === "unfurnished" &&
-                  styles.activeFilterButton,
-              ]}
-              onPress={() =>
-                setFilters({ ...filters, furnishingStatus: "unfurnished" })
-              }
-            >
-              <Text style={styles.filterButtonText}>Unfurnished</Text>
-            </TouchableOpacity>
           </View>
         </View>
       )}
@@ -259,13 +149,13 @@ export default function HomeScreen({ navigation }) {
             : styles.lightSecondaryText,
         ]}
       >
-        Showing {filteredHouses.length} of {houses.length} houses
+        Showing {filteredCountries.length} of {countries.length} countries
       </Text>
 
       <FlatList
-        data={filteredHouses}
+        data={filteredCountries}
         keyExtractor={(item, index) => index.toString()}
-        renderItem={({ item }) => <HouseListing house={item} />}
+        renderItem={({ item }) => <CountryListing country={item} />}
         contentContainerStyle={styles.listContent}
         style={styles.list}
         showsVerticalScrollIndicator={false}
