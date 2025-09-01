@@ -7,139 +7,258 @@ import {
   ScrollView,
 } from "react-native";
 import { useAppContext } from "../contexts/AppContext";
+import { Ionicons } from "@expo/vector-icons";
+import {
+  COLORS,
+  TYPOGRAPHY,
+  SPACING,
+  BORDER_RADIUS,
+  SHADOWS,
+} from "../constants/DesignSystem";
 
 export default function ProfileScreen({ navigation }) {
   const { state } = useAppContext();
+
+  const getThemeColors = () => {
+    return state.theme === "dark" ? COLORS.dark : COLORS.light;
+  };
+
+  const themeColors = getThemeColors();
 
   return (
     <ScrollView
       style={[
         styles.scrollContainer,
-        state.theme === "dark" ? styles.darkContainer : styles.lightContainer,
+        { backgroundColor: themeColors.background },
       ]}
       contentContainerStyle={styles.container}
     >
-      <View style={styles.header}>
-        <Text
+      {/* Profile Header */}
+      <View
+        style={[styles.profileHeader, { backgroundColor: themeColors.surface }]}
+      >
+        <View
           style={[
-            styles.name,
-            state.theme === "dark" ? styles.darkText : styles.lightText,
+            styles.avatarContainer,
+            { backgroundColor: themeColors.surface },
           ]}
         >
-          John Doe
-        </Text>
-        <Text
-          style={[
-            styles.title,
-            state.theme === "dark" ? styles.darkText : styles.lightText,
-          ]}
-        >
-          Senior Software Developer
-        </Text>
+          <Ionicons
+            name="person"
+            size={48}
+            color={themeColors.text.secondary}
+          />
+        </View>
+        <View style={styles.profileInfo}>
+          <Text style={[styles.name, { color: themeColors.text.primary }]}>
+            John Doe
+          </Text>
+          <Text style={[styles.title, { color: themeColors.text.secondary }]}>
+            Senior Software Developer
+          </Text>
+        </View>
       </View>
 
-      <View style={styles.section}>
-        <Text
-          style={[
-            styles.sectionTitle,
-            state.theme === "dark" ? styles.darkText : styles.lightText,
-          ]}
+      {/* Profile Sections */}
+      <View style={styles.sectionsContainer}>
+        {/* About Me Section */}
+        <View
+          style={[styles.sectionCard, { backgroundColor: themeColors.card }]}
         >
-          About Me
-        </Text>
-        <Text
-          style={[
-            styles.sectionContent,
-            state.theme === "dark" ? styles.darkText : styles.lightText,
-          ]}
-        >
-          Passionate software developer with 5+ years of experience in building
-          scalable web and mobile applications. Specialized in React Native,
-          JavaScript, and modern web technologies.
-        </Text>
-      </View>
+          <View style={styles.sectionHeader}>
+            <Ionicons
+              name="information-circle"
+              size={20}
+              color={COLORS.primary[500]}
+            />
+            <Text
+              style={[styles.sectionTitle, { color: themeColors.text.primary }]}
+            >
+              About Me
+            </Text>
+          </View>
+          <Text
+            style={[
+              styles.sectionContent,
+              { color: themeColors.text.secondary },
+            ]}
+          >
+            Passionate software developer with 5+ years of experience in
+            building scalable web and mobile applications. Specialized in React
+            Native, JavaScript, and modern web technologies.
+          </Text>
+        </View>
 
-      <View style={styles.section}>
-        <Text
-          style={[
-            styles.sectionTitle,
-            state.theme === "dark" ? styles.darkText : styles.lightText,
-          ]}
+        {/* Experience Section */}
+        <View
+          style={[styles.sectionCard, { backgroundColor: themeColors.card }]}
         >
-          Experience
-        </Text>
-        <Text
-          style={[
-            styles.sectionContent,
-            state.theme === "dark" ? styles.darkText : styles.lightText,
-          ]}
-        >
-          • Senior Developer at TechCorp (2022-Present)
-          {"\n"}• Full Stack Developer at StartupXYZ (2020-2022)
-          {"\n"}• Junior Developer at WebSolutions (2019-2020)
-        </Text>
-      </View>
+          <View style={styles.sectionHeader}>
+            <Ionicons name="briefcase" size={20} color={COLORS.primary[500]} />
+            <Text
+              style={[styles.sectionTitle, { color: themeColors.text.primary }]}
+            >
+              Experience
+            </Text>
+          </View>
+          <View style={styles.experienceItem}>
+            <View style={styles.bulletPoint} />
+            <Text
+              style={[
+                styles.experienceText,
+                { color: themeColors.text.secondary },
+              ]}
+            >
+              Senior Developer at TechCorp (2022-Present)
+            </Text>
+          </View>
+          <View style={styles.experienceItem}>
+            <View style={styles.bulletPoint} />
+            <Text
+              style={[
+                styles.experienceText,
+                { color: themeColors.text.secondary },
+              ]}
+            >
+              Full Stack Developer at StartupXYZ (2020-2022)
+            </Text>
+          </View>
+          <View style={styles.experienceItem}>
+            <View style={styles.bulletPoint} />
+            <Text
+              style={[
+                styles.experienceText,
+                { color: themeColors.text.secondary },
+              ]}
+            >
+              Junior Developer at WebSolutions (2019-2020)
+            </Text>
+          </View>
+        </View>
 
-      <View style={styles.section}>
-        <Text
-          style={[
-            styles.sectionTitle,
-            state.theme === "dark" ? styles.darkText : styles.lightText,
-          ]}
+        {/* Skills Section */}
+        <View
+          style={[styles.sectionCard, { backgroundColor: themeColors.card }]}
         >
-          Skills
-        </Text>
-        <Text
-          style={[
-            styles.sectionContent,
-            state.theme === "dark" ? styles.darkText : styles.lightText,
-          ]}
-        >
-          React Native • JavaScript • TypeScript • Node.js • Python • AWS • Git
-          • CI/CD
-        </Text>
-      </View>
+          <View style={styles.sectionHeader}>
+            <Ionicons name="code-slash" size={20} color={COLORS.primary[500]} />
+            <Text
+              style={[styles.sectionTitle, { color: themeColors.text.primary }]}
+            >
+              Skills
+            </Text>
+          </View>
+          <View style={styles.skillsContainer}>
+            {[
+              "React Native",
+              "JavaScript",
+              "TypeScript",
+              "Node.js",
+              "Python",
+              "AWS",
+              "Git",
+              "CI/CD",
+            ].map((skill, index) => (
+              <View
+                key={index}
+                style={[
+                  styles.skillPill,
+                  { backgroundColor: themeColors.surface },
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.skillText,
+                    { color: themeColors.text.secondary },
+                  ]}
+                >
+                  {skill}
+                </Text>
+              </View>
+            ))}
+          </View>
+        </View>
 
-      <View style={styles.section}>
-        <Text
-          style={[
-            styles.sectionTitle,
-            state.theme === "dark" ? styles.darkText : styles.lightText,
-          ]}
+        {/* Education Section */}
+        <View
+          style={[styles.sectionCard, { backgroundColor: themeColors.card }]}
         >
-          Education
-        </Text>
-        <Text
-          style={[
-            styles.sectionContent,
-            state.theme === "dark" ? styles.darkText : styles.lightText,
-          ]}
-        >
-          Bachelor of Computer Science - University of Technology (2015-2019)
-        </Text>
-      </View>
+          <View style={styles.sectionHeader}>
+            <Ionicons name="school" size={20} color={COLORS.primary[500]} />
+            <Text
+              style={[styles.sectionTitle, { color: themeColors.text.primary }]}
+            >
+              Education
+            </Text>
+          </View>
+          <Text
+            style={[
+              styles.sectionContent,
+              { color: themeColors.text.secondary },
+            ]}
+          >
+            Bachelor of Computer Science - University of Technology (2015-2019)
+          </Text>
+        </View>
 
-      <View style={styles.section}>
-        <Text
-          style={[
-            styles.sectionTitle,
-            state.theme === "dark" ? styles.darkText : styles.lightText,
-          ]}
+        {/* Contact Section */}
+        <View
+          style={[styles.sectionCard, { backgroundColor: themeColors.card }]}
         >
-          Contact
-        </Text>
-        <Text
-          style={[
-            styles.sectionContent,
-            state.theme === "dark" ? styles.darkText : styles.lightText,
-          ]}
-        >
-          Email: john.doe@example.com
-          {"\n"}
-          Phone: +1 (555) 123-4567
-          {"\n"}
-          LinkedIn: linkedin.com/in/johndoe
-        </Text>
+          <View style={styles.sectionHeader}>
+            <Ionicons name="mail" size={20} color={COLORS.primary[500]} />
+            <Text
+              style={[styles.sectionTitle, { color: themeColors.text.primary }]}
+            >
+              Contact
+            </Text>
+          </View>
+          <View style={styles.contactItem}>
+            <Ionicons
+              name="mail-outline"
+              size={16}
+              color={themeColors.text.secondary}
+            />
+            <Text
+              style={[
+                styles.contactText,
+                { color: themeColors.text.secondary },
+              ]}
+            >
+              john.doe@example.com
+            </Text>
+          </View>
+          <View style={styles.contactItem}>
+            <Ionicons
+              name="call-outline"
+              size={16}
+              color={themeColors.text.secondary}
+            />
+            <Text
+              style={[
+                styles.contactText,
+                { color: themeColors.text.secondary },
+              ]}
+            >
+              +1 (555) 123-4567
+            </Text>
+          </View>
+          <View style={styles.contactItem}>
+            <Ionicons
+              name="logo-linkedin"
+              size={16}
+              color={themeColors.text.secondary}
+            />
+            <Text
+              style={[
+                styles.contactText,
+                { color: themeColors.text.secondary },
+              ]}
+            >
+              linkedin.com/in/johndoe
+            </Text>
+          </View>
+        </View>
       </View>
     </ScrollView>
   );
@@ -150,67 +269,98 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   container: {
-    padding: 20,
+    padding: SPACING.lg,
   },
-  lightContainer: {
-    backgroundColor: "#ffffff",
-  },
-  darkContainer: {
-    backgroundColor: "#121212",
-  },
-  header: {
+  profileHeader: {
+    flexDirection: "row",
     alignItems: "center",
-    marginBottom: 30,
-    paddingTop: 20,
+    marginBottom: SPACING.xl,
+    padding: SPACING.lg,
+    borderRadius: BORDER_RADIUS.lg,
+    ...SHADOWS.md,
+  },
+  avatarContainer: {
+    width: 80,
+    height: 80,
+    borderRadius: BORDER_RADIUS.full,
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: SPACING.md,
+    ...SHADOWS.sm,
+  },
+  profileInfo: {
+    flex: 1,
   },
   name: {
-    fontSize: 28,
-    fontWeight: "bold",
-    marginBottom: 5,
+    ...TYPOGRAPHY.h2,
+    marginBottom: SPACING.xs,
   },
   title: {
-    fontSize: 18,
-    fontWeight: "600",
+    ...TYPOGRAPHY.body2,
     opacity: 0.8,
   },
-  lightText: {
-    color: "#000000",
+  sectionsContainer: {
+    gap: SPACING.lg,
   },
-  darkText: {
-    color: "#ffffff",
+  sectionCard: {
+    padding: SPACING.lg,
+    borderRadius: BORDER_RADIUS.lg,
+    ...SHADOWS.sm,
   },
-  section: {
-    marginBottom: 25,
+  sectionHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: SPACING.md,
+    gap: SPACING.sm,
   },
   sectionTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    marginBottom: 10,
-    borderBottomWidth: 2,
-    borderBottomColor: "#5856D6",
-    paddingBottom: 5,
+    ...TYPOGRAPHY.h3,
+    fontWeight: "600",
   },
   sectionContent: {
-    fontSize: 16,
+    ...TYPOGRAPHY.body2,
+    lineHeight: 24,
+  },
+  experienceItem: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    marginBottom: SPACING.sm,
+    gap: SPACING.sm,
+  },
+  bulletPoint: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: COLORS.primary[500],
+    marginTop: 8,
+  },
+  experienceText: {
+    ...TYPOGRAPHY.body2,
+    flex: 1,
     lineHeight: 22,
   },
-  info: {
-    fontSize: 18,
-    marginBottom: 15,
-    textAlign: "center",
+  skillsContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: SPACING.sm,
   },
-  navButton: {
-    backgroundColor: "#5856D6",
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    borderRadius: 8,
-    marginBottom: 10,
-    minWidth: 200,
+  skillPill: {
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.xs,
+    borderRadius: BORDER_RADIUS.full,
+    ...SHADOWS.xs,
+  },
+  skillText: {
+    ...TYPOGRAPHY.caption,
+    fontWeight: "500",
+  },
+  contactItem: {
+    flexDirection: "row",
     alignItems: "center",
+    marginBottom: SPACING.sm,
+    gap: SPACING.sm,
   },
-  navButtonText: {
-    color: "white",
-    fontSize: 16,
-    fontWeight: "bold",
+  contactText: {
+    ...TYPOGRAPHY.body2,
   },
 });

@@ -6,40 +6,64 @@ import HomeScreen from "./screens/HomeScreen";
 import ProfileScreen from "./screens/ProfileScreen";
 import SettingsScreen from "./screens/SettingsScreen";
 import { Ionicons } from "@expo/vector-icons";
+import {
+  COLORS,
+  SPACING,
+  BORDER_RADIUS,
+  SHADOWS,
+} from "./constants/DesignSystem";
 
 const Tab = createBottomTabNavigator();
 
 function MainNavigator() {
   const { state } = useAppContext();
 
+  const getThemeColors = () => {
+    return state.theme === "dark" ? COLORS.dark : COLORS.light;
+  };
+
+  const themeColors = getThemeColors();
+
   const screenOptions = ({ route }) => ({
     tabBarIcon: ({ focused, color, size }) => {
       let iconName;
 
       if (route.name === "Home") {
-        iconName = focused ? "home" : "home-outline";
+        iconName = focused ? "compass" : "compass-outline";
       } else if (route.name === "Profile") {
-        iconName = focused ? "person" : "person-outline";
+        iconName = focused ? "person-circle" : "person-circle-outline";
       } else if (route.name === "Settings") {
-        iconName = focused ? "settings" : "settings-outline";
+        iconName = focused ? "cog" : "cog-outline";
       }
 
       return <Ionicons name={iconName} size={size} color={color} />;
     },
-    tabBarActiveTintColor: "#007AFF",
-    tabBarInactiveTintColor: state.theme === "dark" ? "#cccccc" : "gray",
+    tabBarActiveTintColor: COLORS.primary[500],
+    tabBarInactiveTintColor: themeColors.text.secondary,
     tabBarStyle: {
-      backgroundColor: state.theme === "dark" ? "#121212" : "#ffffff",
-      borderTopWidth: 1,
-      borderTopColor: state.theme === "dark" ? "#333333" : "#e0e0e0",
+      backgroundColor: themeColors.card,
+      borderTopWidth: 0,
+      height: 80,
+      paddingBottom: SPACING.md,
+      paddingTop: SPACING.sm,
+      ...SHADOWS.lg,
+    },
+    tabBarLabelStyle: {
+      fontSize: 12,
+      fontWeight: "600",
+      marginTop: SPACING.xs,
     },
     headerStyle: {
-      backgroundColor: state.theme === "dark" ? "#1a1a1a" : "#007AFF",
+      backgroundColor: themeColors.background,
+      elevation: 0,
+      shadowOpacity: 0,
     },
-    headerTintColor: "#fff",
     headerTitleStyle: {
-      fontWeight: "bold",
+      fontSize: 20,
+      fontWeight: "700",
+      color: themeColors.text.primary,
     },
+    headerTintColor: themeColors.text.primary,
   });
 
   return (
@@ -47,7 +71,7 @@ function MainNavigator() {
       <Tab.Screen
         name="Home"
         component={HomeScreen}
-        options={{ title: "My Expo App" }}
+        options={{ title: "Explore" }}
       />
       <Tab.Screen
         name="Profile"

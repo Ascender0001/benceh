@@ -6,9 +6,23 @@ import {
   TouchableOpacity,
   FlatList,
   TextInput,
+  ScrollView,
+  ActivityIndicator,
+  Animated,
+  Easing,
 } from "react-native";
 import { useAppContext } from "../contexts/AppContext";
 import CountryListing from "../components/CountryListing";
+import EmptyState from "../components/EmptyState";
+import { Ionicons } from "@expo/vector-icons";
+import {
+  COLORS,
+  TYPOGRAPHY,
+  SPACING,
+  BORDER_RADIUS,
+  SHADOWS,
+  ANIMATIONS,
+} from "../constants/DesignSystem";
 
 export default function HomeScreen({ navigation }) {
   const { state, actions } = useAppContext();
@@ -20,6 +34,7 @@ export default function HomeScreen({ navigation }) {
   const [filters, setFilters] = useState({
     region: "",
   });
+  const [animation] = useState(new Animated.Value(0));
 
   useEffect(() => {
     const loadCountries = () => {
@@ -27,6 +42,12 @@ export default function HomeScreen({ navigation }) {
         const response = require("../assets/data.json");
         setCountries(response);
         setFilteredCountries(response);
+        Animated.timing(animation, {
+          toValue: 1,
+          duration: ANIMATIONS.timing.standard,
+          easing: Easing.ease,
+          useNativeDriver: true,
+        }).start();
       } catch (error) {
         console.error("Error loading countries data:", error);
       } finally {
@@ -63,103 +84,156 @@ export default function HomeScreen({ navigation }) {
     setFilteredCountries(filtered);
   }, [searchQuery, filters, countries]);
 
+  const toggleFilters = () => {
+    setShowFilters(!showFilters);
+    Animated.spring(animation, {
+      toValue: showFilters ? 0 : 1,
+      friction: 8,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const getThemeColors = () => {
+    return state.theme === "dark" ? COLORS.dark : COLORS.light;
+  };
+
+  const themeColors = getThemeColors();
+
   if (loading) {
     return (
       <View
-        style={[
-          styles.container,
-          state.theme === "dark" ? styles.darkContainer : styles.lightContainer,
-        ]}
+        style={[styles.container, { backgroundColor: themeColors.background }]}
       >
-        <Text
-          style={[
-            styles.title,
-            state.theme === "dark" ? styles.darkText : styles.lightText,
-          ]}
-        >
-          Loading countries...
-        </Text>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={COLORS.primary[500]} />
+          <Text
+            style={[styles.loadingText, { color: themeColors.text.primary }]}
+          >
+            Loading countries...
+          </Text>
+        </View>
       </View>
     );
   }
 
+  const filterHeight = animation.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0, 100],
+  });
+
   return (
     <View
-      style={[
-        styles.container,
-        state.theme === "dark" ? styles.darkContainer : styles.lightContainer,
-      ]}
+      style={[styles.container, { backgroundColor: themeColors.background }]}
     >
-      <Text
-        style={[
-          styles.title,
-          state.theme === "dark" ? styles.darkText : styles.lightText,
-        ]}
-      >
-        Countries Browser
-      </Text>
-
-      {/* Search Bar */}
-      <TextInput
-        style={[
-          styles.searchInput,
-          state.theme === "dark" ? styles.darkInput : styles.lightInput,
-        ]}
-        placeholder="Search by name, capital, region, currency..."
-        placeholderTextColor={state.theme === "dark" ? "#bdc3c7" : "#7f8c8d"}
-        value={searchQuery}
-        onChangeText={setSearchQuery}
-      />
-
-      {/* Filter Toggle Button */}
-      <TouchableOpacity
-        style={styles.filterToggleButton}
-        onPress={() => setShowFilters(!showFilters)}
-      >
-        <Text style={styles.filterToggleText}>
-          {showFilters ? "Hide Filters" : "Show Filters"}
-        </Text>
-      </TouchableOpacity>
-
-      {/* Filters Section - Conditionally Rendered */}
-      {showFilters && (
-        <View style={styles.filtersMenu}>
-          <View style={styles.filtersContainer}>
-            <TextInput
-              style={[
-                styles.filterInput,
-                state.theme === "dark" ? styles.darkInput : styles.lightInput,
-              ]}
-              placeholder="Region (e.g., Asia, Europe)"
-              placeholderTextColor={
-                state.theme === "dark" ? "#bdc3c7" : "#7f8c8d"
-              }
-              value={filters.region}
-              onChangeText={(text) => setFilters({ ...filters, region: text })}
-            />
-          </View>
-        </View>
-      )}
-
-      <Text
-        style={[
-          styles.resultsCount,
-          state.theme === "dark"
-            ? styles.darkSecondaryText
-            : styles.lightSecondaryText,
-        ]}
-      >
-        Showing {filteredCountries.length} of {countries.length} countries
-      </Text>
-
-      <FlatList
-        data={filteredCountries}
-        keyExtractor={(item, index) => index.toString()}
-        renderItem={({ item }) => <CountryListing country={item} />}
-        contentContainerStyle={styles.listContent}
-        style={styles.list}
+      <ScrollView
+        style={styles.scrollView}
         showsVerticalScrollIndicator={false}
-      />
+      >
+        {/* Header Section */}
+        <View style={styles.header}>
+          <Text style={[styles.title, { color: themeColors.text.primary }]}>
+            Explore Countries
+          </Text>
+          <Text
+            style={[styles.subtitle, { color: themeColors.text.secondary }]}
+          >
+            Discover {countries.length} countries worldwide
+          </Text>
+        </View>
+
+        {/* Search Bar */}
+        <View
+          style={[
+            styles.searchContainer,
+            { backgroundColor: themeColors.input.background },
+          ]}
+        >
+          <Ionicons
+            name="search"
+            size={20}
+            color={themeColors.text.tertiary}
+            style={styles.searchIcon}
+          />
+          <TextInput
+            style={[styles.searchInput, { color: themeColors.input.text }]}
+            placeholder="Search countries..."
+            placeholderTextColor={themeColors.text.tertiary}
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+          />
+        </View>
+
+        {/* Filter Toggle Button */}
+        <TouchableOpacity
+          style={[
+            styles.filterToggleButton,
+            { backgroundColor: COLORS.primary[500] },
+          ]}
+          onPress={toggleFilters}
+        >
+          <Ionicons
+            name={showFilters ? "filter" : "filter-outline"}
+            size={16}
+            color="#ffffff"
+          />
+          <Text style={styles.filterToggleText}>
+            {showFilters ? "Hide Filters" : "Show Filters"}
+          </Text>
+        </TouchableOpacity>
+
+        {/* Filters Section */}
+        <Animated.View
+          style={[
+            styles.filtersContainer,
+            {
+              height: filterHeight,
+              opacity: animation,
+              backgroundColor: themeColors.surface,
+            },
+          ]}
+        >
+          <TextInput
+            style={[
+              styles.filterInput,
+              {
+                backgroundColor: themeColors.input.background,
+                color: themeColors.input.text,
+                borderColor: themeColors.input.border,
+              },
+            ]}
+            placeholder="Filter by region (e.g., Asia, Europe)"
+            placeholderTextColor={themeColors.text.tertiary}
+            value={filters.region}
+            onChangeText={(text) => setFilters({ ...filters, region: text })}
+          />
+        </Animated.View>
+
+        {/* Results Count */}
+        <Text
+          style={[styles.resultsCount, { color: themeColors.text.secondary }]}
+        >
+          {filteredCountries.length} of {countries.length} countries found
+        </Text>
+
+        {/* Countries List or Empty State */}
+        {filteredCountries.length === 0 ? (
+          <EmptyState
+            title="No countries found"
+            message="Try adjusting your search or filters to find more results."
+            icon="search-outline"
+          />
+        ) : (
+          <FlatList
+            data={filteredCountries}
+            keyExtractor={(item, index) => index.toString()}
+            renderItem={({ item }) => <CountryListing country={item} />}
+            contentContainerStyle={styles.listContent}
+            style={styles.list}
+            scrollEnabled={false}
+            showsVerticalScrollIndicator={false}
+          />
+        )}
+      </ScrollView>
     </View>
   );
 }
@@ -167,166 +241,90 @@ export default function HomeScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
   },
-  listContent: {
-    paddingBottom: 20,
-  },
-  list: {
+  scrollView: {
     flex: 1,
   },
-  lightContainer: {
-    backgroundColor: "#ffffff",
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    gap: SPACING.md,
   },
-  darkContainer: {
-    backgroundColor: "#121212",
+  loadingText: {
+    ...TYPOGRAPHY.body1,
+  },
+  header: {
+    padding: SPACING.xl,
+    paddingBottom: SPACING.md,
   },
   title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    marginBottom: 20,
+    ...TYPOGRAPHY.h1,
+    marginBottom: SPACING.xs,
   },
-  lightText: {
-    color: "#000000",
-  },
-  darkText: {
-    color: "#ffffff",
-  },
-  lightSecondaryText: {
-    color: "#7f8c8d",
-  },
-  darkSecondaryText: {
-    color: "#bdc3c7",
-  },
-  counter: {
-    fontSize: 32,
-    fontWeight: "bold",
-    marginBottom: 30,
-  },
-  buttonContainer: {
-    flexDirection: "row",
-    gap: 15,
-    marginBottom: 20,
-  },
-  button: {
-    backgroundColor: "#007AFF",
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    borderRadius: 8,
-    minWidth: 60,
-    alignItems: "center",
-  },
-  buttonText: {
-    color: "white",
-    fontSize: 18,
-    fontWeight: "bold",
-  },
-  navButton: {
-    backgroundColor: "#5856D6",
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    borderRadius: 8,
-    marginBottom: 10,
-    minWidth: 200,
-    alignItems: "center",
-  },
-  navButtonText: {
-    color: "white",
-    fontSize: 16,
-    fontWeight: "bold",
-  },
-  themeButton: {
-    backgroundColor: "#34C759",
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    borderRadius: 8,
-    marginTop: 20,
-  },
-  themeButtonText: {
-    color: "white",
-    fontSize: 16,
-    fontWeight: "bold",
-  },
-  searchInput: {
-    height: 55,
-    borderWidth: 2,
-    borderRadius: 12,
-    paddingHorizontal: 20,
-    marginBottom: 20,
-    fontSize: 16,
-    fontWeight: "500",
-  },
-  lightInput: {
-    backgroundColor: "#f8f9fa",
-    borderColor: "#e9ecef",
-    color: "#212529",
-  },
-  darkInput: {
-    backgroundColor: "#2d2d2d",
-    borderColor: "#495057",
-    color: "#f8f9fa",
-  },
-  filtersContainer: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 12,
-    marginBottom: 20,
-  },
-  filterInput: {
-    height: 45,
-    borderWidth: 2,
-    borderRadius: 10,
-    paddingHorizontal: 15,
-    minWidth: 120,
-    fontSize: 14,
-    fontWeight: "500",
-  },
-  furnishingFilter: {
-    flexDirection: "row",
-    alignItems: "center",
-    flexWrap: "wrap",
-    gap: 10,
-    marginBottom: 20,
-  },
-  filterLabel: {
-    fontSize: 15,
-    fontWeight: "600",
-    marginRight: 10,
-  },
-  filterButton: {
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 25,
-    backgroundColor: "#e9ecef",
-  },
-  activeFilterButton: {
-    backgroundColor: "#0d6efd",
-  },
-  filterButtonText: {
-    fontSize: 13,
-    fontWeight: "600",
-    color: "#495057",
-  },
-  resultsCount: {
-    fontSize: 14,
-    marginBottom: 15,
-    fontStyle: "italic",
+  subtitle: {
+    ...TYPOGRAPHY.body2,
     opacity: 0.8,
   },
+  searchContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginHorizontal: SPACING.xl,
+    marginBottom: SPACING.lg,
+    padding: SPACING.md,
+    borderRadius: BORDER_RADIUS.lg,
+    ...SHADOWS.sm,
+  },
+  searchIcon: {
+    marginRight: SPACING.sm,
+  },
+  searchInput: {
+    flex: 1,
+    ...TYPOGRAPHY.body2,
+    padding: 0,
+  },
   filterToggleButton: {
-    backgroundColor: "#0d6efd",
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    borderRadius: 8,
-    marginBottom: 15,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: SPACING.xs,
+    paddingVertical: SPACING.sm,
+    paddingHorizontal: SPACING.md,
+    borderRadius: BORDER_RADIUS.full,
+    marginHorizontal: SPACING.xl,
+    marginBottom: SPACING.md,
     alignSelf: "flex-start",
   },
   filterToggleText: {
-    color: "white",
-    fontSize: 16,
-    fontWeight: "bold",
+    ...TYPOGRAPHY.button,
+    color: "#ffffff",
   },
-  filtersMenu: {
-    marginBottom: 20,
+  filtersContainer: {
+    marginHorizontal: SPACING.xl,
+    marginBottom: SPACING.lg,
+    borderRadius: BORDER_RADIUS.md,
+    padding: SPACING.md,
+    ...SHADOWS.sm,
+    overflow: "hidden",
+  },
+  filterInput: {
+    ...TYPOGRAPHY.body2,
+    height: 44,
+    borderWidth: 1,
+    borderRadius: BORDER_RADIUS.md,
+    paddingHorizontal: SPACING.md,
+  },
+  resultsCount: {
+    ...TYPOGRAPHY.caption,
+    marginHorizontal: SPACING.xl,
+    marginBottom: SPACING.lg,
+    textAlign: "center",
+    opacity: 0.7,
+  },
+  listContent: {
+    paddingHorizontal: SPACING.xl,
+    paddingBottom: SPACING.xxl,
+  },
+  list: {
+    flex: 1,
   },
 });
