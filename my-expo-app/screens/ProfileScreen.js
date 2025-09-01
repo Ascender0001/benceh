@@ -5,6 +5,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   ScrollView,
+  Image,
 } from "react-native";
 import { useAppContext } from "../contexts/AppContext";
 import { Ionicons } from "@expo/vector-icons";
@@ -15,6 +16,7 @@ import {
   BORDER_RADIUS,
   SHADOWS,
 } from "../constants/DesignSystem";
+import Bence from "../assets/Bence.jpg";
 
 export default function ProfileScreen({ navigation }) {
   const { state } = useAppContext();
@@ -43,11 +45,7 @@ export default function ProfileScreen({ navigation }) {
             { backgroundColor: themeColors.surface },
           ]}
         >
-          <Ionicons
-            name="person"
-            size={48}
-            color={themeColors.text.secondary}
-          />
+          <Image source={Bence} style={styles.avatar} />
         </View>
         <View style={styles.profileInfo}>
           <Text style={[styles.name, { color: themeColors.text.primary }]}>
@@ -287,6 +285,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginRight: SPACING.md,
     ...SHADOWS.sm,
+  },
+  avatar: {
+    width: "100%",
+    height: "100%",
+    borderRadius: BORDER_RADIUS.full,
   },
   profileInfo: {
     flex: 1,

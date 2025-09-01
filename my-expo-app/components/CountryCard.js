@@ -2,7 +2,7 @@ import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { useAppContext } from "../contexts/AppContext";
 
-const HouseListing = ({ house }) => {
+const CountryCard = ({ country }) => {
   const { state } = useAppContext();
 
   return (
@@ -14,14 +14,11 @@ const HouseListing = ({ house }) => {
     >
       <Text
         style={[
-          styles.price,
+          styles.name,
           state.theme === "dark" ? styles.darkText : styles.lightText,
         ]}
       >
-        $
-        {typeof house.price === "number"
-          ? house.price.toLocaleString()
-          : house.price}
+        {country.name}
       </Text>
       <Text
         style={[
@@ -31,7 +28,7 @@ const HouseListing = ({ house }) => {
             : styles.lightSecondaryText,
         ]}
       >
-        {house.area} sq ft • {house.bedrooms} bed • {house.bathrooms} bath
+        {country.iso2} • {country.iso3} • {country.numeric_code}
       </Text>
       <Text
         style={[
@@ -41,26 +38,48 @@ const HouseListing = ({ house }) => {
             : styles.lightSecondaryText,
         ]}
       >
-        {house.stories} stories • Parking: {house.parking}
+        Capital: {country.capital || "N/A"}
       </Text>
-      <View style={styles.featuresContainer}>
-        <Text
-          style={[
-            styles.features,
-            state.theme === "dark"
-              ? styles.darkFeaturesText
-              : styles.lightFeaturesText,
-          ]}
-        >
-          {house.mainroad === "yes" ? "Main Road • " : ""}
-          {house.guestroom === "yes" ? "Guest Room • " : ""}
-          {house.basement === "yes" ? "Basement • " : ""}
-          {house.hotwaterheating === "yes" ? "Hot Water • " : ""}
-          {house.airconditioning === "yes" ? "AC • " : ""}
-          {house.prefarea === "yes" ? "Preferred Area • " : ""}
-          Furnished: {house.furnishingstatus}
-        </Text>
-      </View>
+      <Text
+        style={[
+          styles.details,
+          state.theme === "dark"
+            ? styles.darkSecondaryText
+            : styles.lightSecondaryText,
+        ]}
+      >
+        Region: {country.region} • {country.subregion}
+      </Text>
+      <Text
+        style={[
+          styles.details,
+          state.theme === "dark"
+            ? styles.darkSecondaryText
+            : styles.lightSecondaryText,
+        ]}
+      >
+        Currency: {country.currency} ({country.currency_symbol})
+      </Text>
+      <Text
+        style={[
+          styles.details,
+          state.theme === "dark"
+            ? styles.darkSecondaryText
+            : styles.lightSecondaryText,
+        ]}
+      >
+        Phone: +{country.phone_code}
+      </Text>
+      <Text
+        style={[
+          styles.details,
+          state.theme === "dark"
+            ? styles.darkSecondaryText
+            : styles.lightSecondaryText,
+        ]}
+      >
+        TLD: {country.tld}
+      </Text>
     </View>
   );
 };
@@ -83,7 +102,7 @@ const styles = StyleSheet.create({
   darkContainer: {
     backgroundColor: "#2a2a2a",
   },
-  price: {
+  name: {
     fontSize: 24,
     fontWeight: "700",
     marginBottom: 12,
@@ -106,22 +125,6 @@ const styles = StyleSheet.create({
   darkSecondaryText: {
     color: "#cccccc",
   },
-  featuresContainer: {
-    marginTop: 16,
-    paddingTop: 16,
-    borderTopWidth: 1.5,
-    borderTopColor: "rgba(0,0,0,0.15)",
-  },
-  features: {
-    fontSize: 14,
-    lineHeight: 18,
-  },
-  lightFeaturesText: {
-    color: "#888888",
-  },
-  darkFeaturesText: {
-    color: "#aaaaaa",
-  },
 });
 
-export default HouseListing;
+export default CountryCard;
